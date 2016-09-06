@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    
+    <!-- Latest slim minified jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.1.0.slim.min.js"   integrity="sha256-cRpWjoSOw5KcyIOaZNo4i6fZ9tKPhYYb6i5T9RSVJG8="   crossorigin="anonymous"></script>
+    
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<title>Quiz Time</title>
+	<style>
+	.jumbotron{
+		background-image: url('assets/images/univ.jpg');
+		background-repeat: no-repeat;
+		background-size: 40%;	
+		background-position: top center;
+		background-color: white;
+		color: navy;
+		height: 200px;
+	}
+
+	img {
+		margin: 0 auto 0 auto;
+	}
+	
+	div.choices div:hover {
+		color: red;
+	}
+
+	div.choices div:active {
+		color: green;
+	}
+	
+	h4 {
+		font-weight: bold;
+	}
+	.question {
+		padding-left: 60px;
+	}
+	#choicediv * {
+		padding-left: 30px;
+	}
+
+	.feedback {
+		height: 700px;
+		font-size: 2em;
+		background-repeat: no-repeat;
+		background-position: top center;
+		background-size: 25%;
+		color: black;
+		text-align: center;
+		visibility: hidden;
+	}
+
+	.paxman {
+		max-width: 150px;
+	}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+	<div class="row jumbo">
+		<div class="jumbotron">
+			<h2 class="text-center"></h2>
+		</div>
+	</div>
+	<div class="row content">
+		<div class="col-md-3"></div>
+		<div class="col-md-6 content">
+			<div class="panel panel-info content">
+				<div class="panel-heading content">
+					<div class="panel-title text-center content">
+					<span class="glyphicon glyphicon-music content"></span>
+					Time Remaining: <span class='content' id="timeremaining"></span> 
+					</div>
+				</div>
+				<div class="panel-body content">
+					<div class="content">
+						<div class="question content"></div>
+						<h5><div id="choicediv" class="choices content"></div></h5>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3"></div>
+	</div>
+	<div class="row feedback">
+		<div class="col-md-12 feedback">
+			<div class="panel panel-success feedback">
+				<div class="panel-heading feedback"></div>
+				<div class="panel-body feedback">YO</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+
+//VARIABLES
+//======================
+var seconds = 10;
+
+
+var quizQuestions = [
+	{
+		question: "Who wrote the Brandenburg Concertos?",
+		choices: ['Johannes Brahms', 'Johann Sebastian Bach', 'Dietrich Buxtehude', 'Skrillex'],
+		correct: 'Johann Sebastian Bach'
+	},
+	{
+		question: "Who wrote Vespers Solennes De Confessore?",
+		choices: ['Ludwig van Beethoven', 'Pyotr Tchaikovsky', 'Wolfgang Amadeus Mozart', 'Skrillex'],
+		correct: 'Wolfgang Amadeus Mozart'
+	},
+	{
+		question: "Which of the following was not composed by Beethoven?",
+		choices: ['Eroica symphony', 'Appassionata sonata', 'Tragic symphony', 'Eroica variations'],
+		correct: 'Tragic symphony'
+	}
+]
+
+var questionNum; //The current question. Corresponds to quizQuestions.question[]
+var numRightAnswers;
+var numWrongAnswers;
+
+//FUNCTIONS
+//======================
+
+//TIMER FUNCTIONS
+function timerStart() { //Begins the timer function, which executes decrement function every second.
+	timer = setInterval(decrement, 1000);
+}
+
+function decrement() { //decreases the number of seconds by 1 each second until time runs out.
+	$('#timeremaining').text(seconds);
+	seconds--;
+	if (seconds == -1){  // Used seconds < 0 instead of seconds == 0 to display 0 at the end of countdown.
+		timeUp();
+	}
+}
+
+function timeUp() {		//Ends timer function.
+	timeupScroll();
+}
+
+function reset() {
+	seconds = 10;
+	timerStart();
+}
+
+
+//QUESTION FUNCTIONS
+function loadQuestion() {		//Renders the question on the page
+	var currentQ = quizQuestions[questionNum];
+
+	if (questionNum > quizQuestions.length){
+		clearInterval(timer);
+	}
+
+	$('.question').html("<h4>" + currentQ.question + "</h4>");	
+}
+
+function loadChoices() {	//Renders the answer choices on the page
+	var currentQ = quizQuestions[questionNum];
+	var choicesArray = currentQ.choices;
+	
+	for (var i = 0; i < choicesArray.length; i++) {
+
+		choiceHTML = document.getElementById("choicediv");
+		newChoiceDiv = document.createElement("div");
+		newChoiceDiv.innerHTML = "<br> <span class='glyphicon glyphicon-unchecked'></span> " + choicesArray[i];
+		newChoiceDiv.setAttribute("class", "wrong");
+		if (choicesArray[i] === currentQ.correct){	//changes the id of the correct answer choice to 'correct'
+			newChoiceDiv.setAttribute("class", "correct");
+		}
+		choiceHTML.appendChild(newChoiceDiv);
+	}
+}
+
+function clear() {	//Clears the page after a question.
+	reset();
+	$('.wrong').remove();
+	$('.correct').remove();
+}
+
+function gameplay() { 	//Main quiz function
+	clear();
+	loadQuestion();
+	loadChoices();
+
+	$('.correct').on('click', function() {
+		rightScroll();
+		clearInterval(timer);
+		questionNum++;
+		numRightAnswers++;
+		gameplay();
+	})
+
+	$('.wrong').on('click', function() {
+		wrongScroll();
+		clearInterval(timer);
+		questionNum++;
+		numWrongAnswers++;
+		gameplay();
+	})
+}
+
+//ANSWER FEEDBACK FUNCTIONS
+function rightScroll() {
+	var winHeight = $(window).height();
+	$('body').scrollTop(winHeight);
+	$('.feedback').html("<img class='paxman' src='assets/images/paxman.jpg'><br>Correct!");
+	$('.feedback').css('visibility', 'visible');
+	// $('.feedback').css('background-image', 'url("assets/images/paxman.jpg")')
+	$('.content').css('visibility', 'hidden');
+	setTimeout(resetScroll, 1000);
+}
+
+function wrongScroll() {
+	var winHeight = $(window).height();
+	$('body').scrollTop(winHeight);
+	$('.feedback').html("<img class='paxman' src='assets/images/paxman2.jpg'><br>Incorrect!");
+	$('.feedback').css('visibility', 'visible');
+	// $('.feedback').css('background-image', 'url("assets/images/paxman2.jpg")')
+	$('.content').css('visibility', 'hidden');
+	setTimeout(resetScroll, 1000);
+}
+
+function timeupScroll() {
+	var winHeight = $(window).height();
+	$('body').scrollTop(winHeight);
+	$('.feedback').html("<img class='paxman' src='assets/images/paxman2.jpg'><br>The correct answer is: <br> " + $('.correct').text());
+	$('.feedback').css('visibility', 'visible');
+	$('.content').css('visibility', 'hidden');
+	setTimeout(resetScroll, 2000);
+	clearInterval(timer);
+	questionNum++;
+	gameplay();
+}
+
+function resetScroll() {
+	if (questionNum == quizQuestions.length){
+		endGame();
+	}
+	var winHeight = $(window).height();
+	$('body').scrollTop(-winHeight);
+	$('.feedback').css('visibility', 'hidden');
+	$('.content').css('visibility', 'visible');
+}
+
+function endGame() {	//Terminates gameplay
+	clearInterval(timer);
+	var playAgain = confirm('Play again?');
+	if (playAgain){
+		startNewGame();
+	}
+	else {
+		$('.question').html('<h4>I coulda been a contender!</h4>' +
+		'<br>' + 'You correctly answered ' + numRightAnswers + ' out of ' + questionNum + ' questions.');
+	}
+}
+
+function startNewGame() {
+	questionNum = 0;
+	numRightAnswers=0;
+	numWrongAnswers=0;
+	loadQuestion();
+	loadChoices();
+	gameplay();
+}
+
+//MAIN PROCESS
+//======================
+window.onload = function(){  //Main process executes when the page has finished loading.
+	questionNum = 0;
+	numRightAnswers = 0;
+	numWrongAnswers=0;
+
+	gameplay();	
+}
+</script>	
+</body>
+</html>
